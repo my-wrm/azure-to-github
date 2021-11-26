@@ -20,7 +20,8 @@ const tmpDir = 'tmp';
 
 program
   .description('An application for copying publish profiles from Azure App Service to GitHub Secret')
-  .option('-f, --file <config>', 'Config file (Default is secret.config.yml')
+  .option('-t, --type <type>', 'type: webapp, sql. (Default: webapp)')
+  .option('-f, --file <config>', 'Config file (Default is secret.config.yml)')
   .option('-c, --csv-file <CSV Job>', 'Config file for jobs')
   .option('-m, --mock', 'Enable mock mode')
   .option('-r, --remove', 'Remove all Config in Github Secret')
@@ -32,12 +33,13 @@ const opts = program.opts();
 const options = {
   mockMode: opts.mock ? true : false,
   verboseMode: opts.verbose ? true : false,
+  type: opts.type ? opts.type : 'webapp',
   file: opts.file ? opts.file : 'secret.config.yml',
   csvFile: opts.csvFile ? opts.csvFile : 'NO_IMPORT_CSV',
   action: opts.remove ? ACTION.REMOVE : ACTION.SET,
 }
 
-console.log('Options: ', program.opts());
+console.log('Options: ', program.opts(), options);
 
 interface IBashScriptParams {
   repoName: string;
@@ -105,9 +107,7 @@ async function removeSecretMode(secretName: string, job: IJob, config: ISettings
     await run(path.resolve(tmpDir, generateBashScriptFilename(job.id)));
 }
 
-async function main() {
-  const configFile = await readFile(path.resolve(options.file), defaultUnicode);
-  const config = yaml.parse(configFile) as ISettings;
+async function runTypeWebApp(config: ISettings ) {
   if (options.verboseMode) console.log(config);
   const { jobs = [], prefixSecretName, environment } = config.appServices;
   const { github } = config;
@@ -162,6 +162,22 @@ async function main() {
 }
 
 console.log('Please make sure you run: `az login` Before run script')
+
+async function main(){
+  const configFile = await readFile(path.resolve(options.file), defaultUnicode);
+  const config = yaml.parse(configFile) as ISettings;
+  console.log(config);
+
+  switch (options.type) {
+    case "webapp":
+      runTypeWebApp(config);
+      break;
+    case "sql":
+      break;
+    default:
+      throw Error("Support only type webapp, sql");
+  }
+}
 
 main();
 
