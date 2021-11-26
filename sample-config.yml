@@ -3,6 +3,7 @@ github:
   token: GITHUB_ACCESS_TOKEN
 appServices:
   prefixSecretName: AzureAppService_PublishProfile_
+  environment: name
   jobs:
     - id: GIVING_NAME_OF_SECRET
       name: web-app
