@@ -1,5 +1,7 @@
 # Azure to GitHub
 
+Moved to https://github.com/dotnetthailand/azure-to-github
+
 ## Usage
 
 ```
